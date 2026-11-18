@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebView Demo Page</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 16px;
+            background: #f4f6f8;
+        }
+        button {
+            display: block;
+            width: 100%;
+            margin: 8px 0;
+            padding: 12px;
+            font-size: 16px;
+        }
+        #status {
+            margin-top: 12px;
+            padding: 8px;
+            background: #fff;
+            border: 1px solid #ccc;
+            min-height: 48px;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <p>与 Cocos 文档一致：<code>testkey://</code>（Native）与 <code>parent.TestCode()</code>（Web）。</p>
+    <button type="button" onclick="onClickScheme()">Native：location = testkey://a=1&b=2</button>
+    <button type="button" onclick="onClickWebBridge()">Web：parent.TestCode()</button>
+    <div id="status">等待交互…</div>
+    <script>
+        /** Cocos 侧 evaluateJS('Test()') 调用的全局函数 */
+        function Test() {
+            var el = document.getElementById('status');
+            el.textContent = '已从 Cocos 调用 Test()，' + new Date().toLocaleTimeString();
+        }
+
+        function onClickScheme() {
+            document.location = 'testkey://a=1&b=2';
+            document.getElementById('status').textContent = '已跳转 scheme：testkey://a=1&b=2';
+        }
+
+        function onClickWebBridge() {
+            try {
+                if (window.parent && window.parent !== window && typeof window.parent.TestCode === 'function') {
+                    window.parent.TestCode();
+                    document.getElementById('status').textContent = '已调用 parent.TestCode()';
+                } else if (typeof window.TestCode === 'function') {
+                    window.TestCode();
+                    document.getElementById('status').textContent = '已调用 window.TestCode()';
+                } else {
+                    document.getElementById('status').textContent = '未找到 TestCode（请在 Cocos 脚本里挂载到 window）';
+                }
+            } catch (e) {
+                document.getElementById('status').textContent = '调用失败: ' + e;
+            }
+        }
+    </script>
+</body>
+</html>
